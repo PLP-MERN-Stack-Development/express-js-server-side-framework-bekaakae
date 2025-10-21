@@ -1,0 +1,479 @@
+Product RESTful API
+A complete Express.js RESTful API for managing products with MongoDB Atlas integration, featuring CRUD operations, authentication, validation, and advanced querying capabilities.
+
+🚀 Features
+CRUD Operations - Create, Read, Update, Delete products
+
+MongoDB Integration - Cloud database with Mongoose ODM
+
+Authentication - API key protection for write operations
+
+Validation - Comprehensive request validation
+
+Search & Filtering - Advanced query capabilities
+
+Pagination - Efficient data retrieval
+
+Error Handling - Robust error management
+
+Logging - Request logging middleware
+
+📋 Prerequisites
+Node.js (v18 or higher)
+
+MongoDB Atlas account
+
+Postman (for API testing)
+
+🛠️ Installation & Setup
+1. Clone and Install Dependencies
+bash
+# Navigate to project directory
+cd "week 2 assignment"
+
+# Install dependencies
+npm install
+2. Environment Configuration
+Create a .env file in the root directory:
+
+env
+# MongoDB Atlas Connection
+MONGODB_URI=mongodb+srv://your-username:your-password@cluster0.xxxxx.mongodb.net/product-api?retryWrites=true&w=majority
+
+# API Security (optional for development)
+API_KEY=your-secure-api-key-12345
+
+# Server Configuration
+PORT=3000
+NODE_ENV=development
+3. Get MongoDB Atlas Connection String
+Go to MongoDB Atlas
+
+Create a new cluster or use existing one
+
+Click "Connect" → "Connect your application"
+
+Copy the connection string
+
+Replace your-username, your-password, and cluster0.xxxxx with your actual credentials
+
+4. Run the Server
+bash
+# Development mode with auto-restart
+npm run dev
+
+# Production mode
+npm start
+Expected Output:
+
+text
+🚀 Server is running on http://localhost:3000
+🌍 Environment: development
+📊 MongoDB: Connected
+⏰ Started at: 11/20/2024, 10:30:00 AM
+📚 API Endpoints
+Base URL: http://localhost:3000
+Authentication
+POST, PUT, DELETE routes require API key in header:
+
+text
+x-api-key: your-secure-api-key-12345
+🔍 Product Endpoints
+1. Get All Products
+GET /api/products
+
+Query Parameters:
+
+page - Page number (default: 1)
+
+limit - Items per page (default: 10, max: 50)
+
+category - Filter by category
+
+inStock - Filter by stock status (true/false)
+
+search - Search in name and description
+
+minPrice - Minimum price filter
+
+maxPrice - Maximum price filter
+
+sortBy - Field to sort by (default: createdAt)
+
+order - Sort order (asc/desc, default: desc)
+
+Example Request:
+
+http
+GET http://localhost:3000/api/products?page=1&limit=5&category=electronics&inStock=true
+Success Response (200):
+
+json
+{
+  "products": [
+    {
+      "_id": "67a1b2c3d4e5f67890123456",
+      "name": "Wireless Headphones",
+      "description": "Noise-cancelling wireless headphones",
+      "price": 149.99,
+      "category": "electronics",
+      "inStock": true,
+      "createdAt": "2024-11-20T10:30:00.000Z",
+      "updatedAt": "2024-11-20T10:30:00.000Z"
+    }
+  ],
+  "pagination": {
+    "currentPage": 1,
+    "totalPages": 3,
+    "totalProducts": 12,
+    "hasNext": true,
+    "hasPrev": false
+  }
+}
+2. Get Single Product
+GET /api/products/:id
+
+Example Request:
+
+http
+GET http://localhost:3000/api/products/67a1b2c3d4e5f67890123456
+Success Response (200):
+
+json
+{
+  "_id": "67a1b2c3d4e5f67890123456",
+  "name": "Wireless Headphones",
+  "description": "Noise-cancelling wireless headphones",
+  "price": 149.99,
+  "category": "electronics",
+  "inStock": true,
+  "createdAt": "2024-11-20T10:30:00.000Z",
+  "updatedAt": "2024-11-20T10:30:00.000Z"
+}
+Error Response (404):
+
+json
+{
+  "error": "Product not found"
+}
+3. Create New Product
+POST /api/products
+
+Headers:
+
+text
+Content-Type: application/json
+x-api-key: your-secure-api-key-12345
+Request Body:
+
+json
+{
+  "name": "Smartphone",
+  "description": "Latest smartphone with 128GB storage",
+  "price": 899.99,
+  "category": "electronics",
+  "inStock": true
+}
+Available Categories: electronics, clothing, books, home, sports, beauty, toys, other
+
+Success Response (201):
+
+json
+{
+  "_id": "67a1b2c3d4e5f67890123457",
+  "name": "Smartphone",
+  "description": "Latest smartphone with 128GB storage",
+  "price": 899.99,
+  "category": "electronics",
+  "inStock": true,
+  "createdAt": "2024-11-20T10:35:00.000Z",
+  "updatedAt": "2024-11-20T10:35:00.000Z",
+  "__v": 0
+}
+Validation Error (400):
+
+json
+{
+  "error": "Validation failed",
+  "details": [
+    "Price is required and must be a non-negative number",
+    "Category must be one of: electronics, clothing, books, home, sports, beauty, toys, other"
+  ]
+}
+4. Update Product
+PUT /api/products/:id
+
+Headers:
+
+text
+Content-Type: application/json
+x-api-key: your-secure-api-key-12345
+Request Body:
+
+json
+{
+  "name": "Updated Smartphone",
+  "price": 799.99,
+  "inStock": false
+}
+Success Response (200):
+
+json
+{
+  "_id": "67a1b2c3d4e5f67890123457",
+  "name": "Updated Smartphone",
+  "description": "Latest smartphone with 128GB storage",
+  "price": 799.99,
+  "category": "electronics",
+  "inStock": false,
+  "createdAt": "2024-11-20T10:35:00.000Z",
+  "updatedAt": "2024-11-20T10:40:00.000Z",
+  "__v": 0
+}
+5. Delete Product
+DELETE /api/products/:id
+
+Headers:
+
+text
+x-api-key: your-secure-api-key-12345
+Success Response (200):
+
+json
+{
+  "message": "Product deleted successfully",
+  "deletedProduct": {
+    "_id": "67a1b2c3d4e5f67890123457",
+    "name": "Updated Smartphone",
+    "description": "Latest smartphone with 128GB storage",
+    "price": 799.99,
+    "category": "electronics",
+    "inStock": false,
+    "createdAt": "2024-11-20T10:35:00.000Z",
+    "updatedAt": "2024-11-20T10:40:00.000Z"
+  }
+}
+6. Search Products by Name
+GET /api/products/search/name?q=query
+
+Example Request:
+
+http
+GET http://localhost:3000/api/products/search/name?q=laptop
+Success Response (200):
+
+json
+[
+  {
+    "_id": "67a1b2c3d4e5f67890123458",
+    "name": "Gaming Laptop",
+    "description": "High-performance gaming laptop",
+    "price": 1299.99,
+    "category": "electronics",
+    "inStock": true,
+    "createdAt": "2024-11-20T10:45:00.000Z",
+    "updatedAt": "2024-11-20T10:45:00.000Z"
+  }
+]
+7. Get Product Statistics
+GET /api/products/stats/summary
+
+Example Request:
+
+http
+GET http://localhost:3000/api/products/stats/summary
+Success Response (200):
+
+json
+{
+  "summary": {
+    "totalProducts": 25,
+    "totalInStock": 18,
+    "avgPriceAll": 245.67
+  },
+  "byCategory": [
+    {
+      "category": "electronics",
+      "count": 8,
+      "avgPrice": 456.25,
+      "minPrice": 49.99,
+      "maxPrice": 1299.99,
+      "inStockCount": 6,
+      "outOfStockCount": 2
+    },
+    {
+      "category": "clothing",
+      "count": 7,
+      "avgPrice": 45.99,
+      "minPrice": 19.99,
+      "maxPrice": 89.99,
+      "inStockCount": 5,
+      "outOfStockCount": 2
+    }
+  ]
+}
+🧪 Testing with Postman
+1. Setup Postman Collection
+Base URL: http://localhost:3000
+
+Headers for POST/PUT/DELETE:
+
+text
+Content-Type: application/json
+x-api-key: your-secure-api-key-12345
+2. Sample Test Data
+Create Electronics Product:
+
+json
+{
+  "name": "Wireless Bluetooth Headphones",
+  "description": "Noise-cancelling wireless headphones with 30-hour battery life",
+  "price": 149.99,
+  "category": "electronics",
+  "inStock": true
+}
+Create Clothing Product:
+
+json
+{
+  "name": "Cotton T-Shirt",
+  "description": "100% cotton premium t-shirt, available in multiple colors",
+  "price": 24.99,
+  "category": "clothing",
+  "inStock": true
+}
+Create Book Product:
+
+json
+{
+  "name": "JavaScript Programming Guide",
+  "description": "Comprehensive guide to modern JavaScript programming",
+  "price": 39.99,
+  "category": "books",
+  "inStock": false
+}
+3. Test Sequence
+GET / - Verify server is running
+
+GET /api/products - Check existing products
+
+POST /api/products - Create new product
+
+GET /api/products/:id - Verify product creation
+
+PUT /api/products/:id - Update product
+
+GET /api/products/search/name?q=query - Test search
+
+GET /api/products/stats/summary - Check statistics
+
+DELETE /api/products/:id - Delete product
+
+🗂️ Project Structure
+text
+week-2-assignment/
+├── models/
+│   └── Product.js              # Product schema and model
+├── middleware/
+│   ├── logger.js               # Request logging
+│   ├── auth.js                 # API key authentication
+│   ├── validation.js           # Request validation
+│   └── errorHandler.js         # Error handling
+├── routes/
+│   └── productRoutes.js        # All product routes
+├── .env                        # Environment variables
+├── db.js                       # MongoDB connection
+├── server.js                   # Express server setup
+└── package.json                # Dependencies and scripts
+🔧 Troubleshooting
+Common Issues:
+Port 3000 in use:
+
+bash
+# Find and kill process
+netstat -ano | findstr :3000
+taskkill /PID <PID> /F
+MongoDB connection failed:
+
+Check connection string in .env
+
+Verify IP whitelist in MongoDB Atlas
+
+Check internet connectivity
+
+Authentication errors:
+
+Ensure x-api-key header is set for write operations
+
+Check API key in .env file
+
+Validation errors:
+
+All fields are required
+
+Price must be a positive number
+
+Category must be from allowed list
+
+Error Responses:
+400 Bad Request:
+
+json
+{
+  "error": "Validation Error",
+  "details": ["Price is required and must be a non-negative number"]
+}
+401 Unauthorized:
+
+json
+{
+  "error": "Authentication required. Please provide API key in x-api-key header."
+}
+404 Not Found:
+
+json
+{
+  "error": "Route not found",
+  "message": "The route GET /api/invalid does not exist on this server"
+}
+500 Internal Server Error:
+
+json
+{
+  "error": "Internal server error",
+  "message": "Database connection failed"
+}
+📝 Validation Rules
+name: Required, string, 2-100 characters
+
+description: Required, string, 10-1000 characters
+
+price: Required, number, 0-100,000 range
+
+category: Required, must be one of: electronics, clothing, books, home, sports, beauty, toys, other
+
+inStock: Optional, boolean, defaults to true
+
+🎯 Advanced Features
+Pagination: Efficient data loading with page & limit parameters
+
+Filtering: By category, price range, stock status
+
+Search: Text search in product names and descriptions
+
+Sorting: Multiple field sorting with order control
+
+Statistics: Aggregated product data and category breakdowns
+
+📞 Support
+If you encounter any issues:
+
+Check the console for error messages
+
+Verify your MongoDB Atlas connection
+
+Ensure all environment variables are set
+
+Check that all required files are in place
+
+Happy Coding! 🚀
