@@ -1,71 +1,76 @@
-// server.js - Starter Express server for Week 2 assignment
+// server.js - Complete Product API for Week 2 assignment
 
 // Import required modules
 const express = require('express');
-const bodyParser = require('body-parser');
-const { v4: uuidv4 } = require('uuid');
+require('dotenv').config();
+const connectDB = require('./db');
+
+// Import middleware
+const logger = require('./middleware/logger');
+const { errorHandler } = require('./middleware/errorHandler');
+
+// Import routes
+const productRoutes = require('./routes/productRoutes');
 
 // Initialize Express app
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Connect to MongoDB
+connectDB();
+
 // Middleware setup
-app.use(bodyParser.json());
+app.use(express.json()); // Built-in Express JSON parser
 
-// Sample in-memory products database
-let products = [
-  {
-    id: '1',
-    name: 'Laptop',
-    description: 'High-performance laptop with 16GB RAM',
-    price: 1200,
-    category: 'electronics',
-    inStock: true
-  },
-  {
-    id: '2',
-    name: 'Smartphone',
-    description: 'Latest model with 128GB storage',
-    price: 800,
-    category: 'electronics',
-    inStock: true
-  },
-  {
-    id: '3',
-    name: 'Coffee Maker',
-    description: 'Programmable coffee maker with timer',
-    price: 50,
-    category: 'kitchen',
-    inStock: false
-  }
-];
+// Custom logger middleware
+app.use(logger);
 
-// Root route
+// Routes
 app.get('/', (req, res) => {
-  res.send('Welcome to the Product API! Go to /api/products to see all products.');
+    res.json({ 
+        message: 'Welcome to the Product API!',
+        endpoints: {
+            getAllProducts: 'GET /api/products',
+            getProduct: 'GET /api/products/:id',
+            createProduct: 'POST /api/products',
+            updateProduct: 'PUT /api/products/:id',
+            deleteProduct: 'DELETE /api/products/:id',
+            searchProducts: 'GET /api/products/search/name?q=query',
+            getStats: 'GET /api/products/stats/summary'
+        },
+        note: 'API key required for POST, PUT, DELETE operations in x-api-key header'
+    });
 });
 
-// TODO: Implement the following routes:
-// GET /api/products - Get all products
-// GET /api/products/:id - Get a specific product
-// POST /api/products - Create a new product
-// PUT /api/products/:id - Update a product
-// DELETE /api/products/:id - Delete a product
+// Product routes
+app.use('/api/products', productRoutes);
 
-// Example route implementation for GET /api/products
-app.get('/api/products', (req, res) => {
-  res.json(products);
+// 404 handler for undefined routes - FIXED: Use a proper path pattern
+app.use((req, res, next) => {
+    res.status(404).json({
+        error: 'Route not found',
+        message: `The route ${req.method} ${req.originalUrl} does not exist on this server`,
+        availableRoutes: [
+            'GET /',
+            'GET /api/products',
+            'GET /api/products/:id',
+            'POST /api/products',
+            'PUT /api/products/:id', 
+            'DELETE /api/products/:id',
+            'GET /api/products/search/name?q=query',
+            'GET /api/products/stats/summary'
+        ]
+    });
 });
 
-// TODO: Implement custom middleware for:
-// - Request logging
-// - Authentication
-// - Error handling
+// Global error handling middleware (must be last)
+app.use(errorHandler);
 
 // Start the server
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+    console.log(`🚀 Server is running on http://localhost:${PORT}`);
+    console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
 });
 
 // Export the app for testing purposes
-module.exports = app; 
+module.exports = app;
